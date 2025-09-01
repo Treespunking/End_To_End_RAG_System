@@ -1,0 +1,24 @@
+# Core dependencies
+langchain
+langchain-openai
+langchain-weaviate
+langchain-huggingface
+langchain-text-splitters
+huggingface-hub
+numpy
+tiktoken
+openai
+httpx
+pydantic
+
+# Vector store & embeddings
+weaviate-client
+sentence-transformers
+
+# Utilities
+python-dotenv
+asyncio
+
+# For Docker builds (optional but recommended)
+uvicorn
+fastapi

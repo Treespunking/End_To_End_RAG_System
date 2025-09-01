@@ -1,0 +1,19 @@
+# Dockerfile.query
+FROM python:3.10-slim
+
+WORKDIR /app
+
+RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
+
+# Copy and install dependencies
+COPY requirements-query.txt .
+RUN pip install --no-cache-dir -r requirements-query.txt
+
+# Copy the query engine script
+COPY query_engine.py .
+
+# Expose port
+EXPOSE 8002
+
+# Run the FastAPI service
+CMD ["uvicorn", "query_engine:app", "--host", "0.0.0.0", "--port", "8002"]

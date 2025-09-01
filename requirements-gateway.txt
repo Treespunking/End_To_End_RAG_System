@@ -1,0 +1,20 @@
+# Core FastAPI dependencies
+fastapi
+uvicorn[standard]
+httpx
+python-multipart
+loguru
+requests
+# Async file handling
+aiofiles
+
+# Environment variable management
+python-dotenv
+
+# Data validation
+pydantic
+
+# Optional: For better logging (already handled via stdlib)
+# logging
+
+# Optional: If you're using additional utilities like UUIDs, they're part of Python stdlib

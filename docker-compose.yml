@@ -1,0 +1,80 @@
+version: '3.8'
+
+services:
+  # API Gateway Service
+  api-gateway:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    ports:
+      - "8000:8000"
+    environment:
+      - API_GATEWAY_HOST=0.0.0.0
+      - API_GATEWAY_PORT=8000
+      - ETL_SERVICE_URL=http://etl-service:8001
+      - QUERY_ENGINE_URL=http://query-engine:8002
+      - WEAVIATE_URL=${WEAVIATE_URL}
+      - WEAVIATE_API_KEY=${WEAVIATE_API_KEY}
+      - MONGODB_URI=${MONGODB_URI}
+      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
+      - OPENROUTER_MODEL=${OPENROUTER_MODEL:-mistralai/mistral-7b-instruct:free}
+      - APP_URL=${APP_URL}
+      - APP_NAME=${APP_NAME}
+    depends_on:
+      etl-service:
+        condition: service_healthy
+      query-engine:
+        condition: service_healthy
+    networks:
+      - rag-network
+
+  # ETL Service
+  etl-service:
+    build:
+      context: .
+      dockerfile: Dockerfile.etl
+    environment:
+      - WEAVIATE_URL=${WEAVIATE_URL}
+      - WEAVIATE_API_KEY=${WEAVIATE_API_KEY}
+      - MONGODB_URI=${MONGODB_URI}
+      - HF_HUB_DISABLE_SYMLINKS_WARNING=true
+      - USER_AGENT=my-rag-app
+    volumes:
+      - ./uploads:/app/uploads
+    ports:
+      - "8001:8001"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8001/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+      start_period: 10s
+    networks:
+      - rag-network
+
+  # Query Engine Service
+  query-engine:
+    build:
+      context: .
+      dockerfile: Dockerfile.query
+    environment:
+      - WEAVIATE_URL=${WEAVIATE_URL}
+      - WEAVIATE_API_KEY=${WEAVIATE_API_KEY}
+      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
+      - OPENROUTER_MODEL=${OPENROUTER_MODEL:-mistralai/mistral-7b-instruct:free}
+      - APP_URL=${APP_URL}
+      - APP_NAME=${APP_NAME}
+    ports:
+      - "8002:8002"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8002/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+      start_period: 10s
+    networks:
+      - rag-network
+
+networks:
+  rag-network:
+    driver: bridge

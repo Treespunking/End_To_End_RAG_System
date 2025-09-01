@@ -1,0 +1,37 @@
+# Core libraries
+langchain
+langchain-community
+langchain-huggingface
+langchain-text-splitters
+tiktoken
+sentence-transformers
+numpy
+scikit-learn
+nltk
+python-multipart
+
+# Document loaders
+unstructured[pdf]
+python-docx
+lxml
+BeautifulSoup4
+docx2txt
+pikepdf
+
+# Vector database & embedding support
+weaviate-client
+huggingface-hub
+
+# Async and database
+motor
+asyncio
+
+# Environment variables
+python-dotenv
+
+# Logging and utilities
+logging
+
+#Docker Build
+uvicorn
+fastapi
