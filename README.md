@@ -237,7 +237,3 @@ python test_query.py "How does RAG improve answer accuracy?"
 * **Large files**: adjust parent/child chunk sizes or ETL timeouts in code if needed.
 
 ---
-
-## License
-
-```
