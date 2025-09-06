@@ -75,7 +75,7 @@ if __name__ == "__main__":
 
     '''
     # Test with specific question
-    python advanced_test.py "What is Retrieval-Augmented Generation?"
+    python test_query.py "what is going to be learned in the revised edition of the book?"
     # Test with default sample questions
     python advanced_test.py
     '''

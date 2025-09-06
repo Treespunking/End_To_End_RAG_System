@@ -215,8 +215,8 @@ if __name__ == "__main__":
 
 
     '''
-    python test_ingestion.py
-    python test_ingestion.py pdf sample.pdf
-    python test_ingestion.py docx sample.docx
-    python test_ingestion.py web https://example.com/page
+    python test_etl.py
+    python test_etl.py pdf file.pdf
+    python test_etl.py docx sample.docx
+    python test_etl.py web https://example.com/page
     '''

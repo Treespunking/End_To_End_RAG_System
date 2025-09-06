@@ -1,72 +1,19 @@
-# Dockerfile.api
-# API Gateway Service for RAG System
-# This Dockerfile builds a production-ready FastAPI service that acts as the entry point
-# for all external requests, handling document ingestion and query processing.
-
-# Use official Python slim image as base
+# Dockerfile.etl
 FROM python:3.10-slim
 
-# Set environment variables for security and reproducibility
-ENV PYTHONDONTWRITEBYTECODE=1 \
-    PYTHONUNBUFFERED=1 \
-    PIP_NO_CACHE_DIR=off \
-    PIP_DISABLE_PIP_VERSION_CHECK=on \
-    PIP_DEFAULT_TIMEOUT=100
-
-# Set working directory
 WORKDIR /app
 
-# Install system dependencies for better performance and security
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
-        build-essential \
-        curl \
-        ca-certificates \
-        netcat \
-        gnupg \
-        libpq-dev \
-        libxml2-dev \
-        libxslt1-dev \
-        zlib1g-dev \
-        libffi-dev \
-        libssl-dev \
-        libblas3 \
-        liblapack3 \
-        libatlas-base-dev \
-        gfortran \
-    && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
 
-# Create non-root user for security
-RUN adduser --disabled-password --gecos '' appuser && \
-    chown -R appuser:appuser /app
-USER appuser
+# Copy and install dependencies
+COPY requirements-gateway.txt .
+RUN pip install --no-cache-dir -r requirements-gateway.txt
 
-# Copy requirements first to leverage Docker layer caching
-COPY --chown=appuser:appuser requirements-api.txt ./
-RUN pip install --no-cache-dir --upgrade pip && \
-    pip install --no-cache-dir -r requirements-api.txt
-
-# Copy application files
-COPY --chown=appuser:appuser api_gateway.py ./
-COPY --chown=appuser:appuser .env.example ./ 2>/dev/null || true
-
-# Create uploads directory with proper permissions
-RUN mkdir -p /app/uploads && \
-    chmod -R 755 /app/uploads
+# Copy the ETL service script
+COPY api_gateway.py .
 
 # Expose port
 EXPOSE 8000
 
-# Health check to ensure service is ready
-HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-    CMD curl -f http://localhost:8000/health || exit 1
-
-# Run the application with uvicorn
-# Using multiple workers for better performance in production
-CMD ["sh", "-c", "uvicorn api_gateway:app \
-    --host ${API_GATEWAY_HOST:-0.0.0.0} \
-    --port ${API_GATEWAY_PORT:-8000} \
-    --workers ${API_GATEWAY_WORKERS:-2} \
-    --timeout-keep-alive 120 \
-    --proxy-headers \
-    --forwarded-allow-ips '*'"]
+# Run the FastAPI ETL service
+CMD ["uvicorn", "api_gateway:app", "--host", "0.0.0.0", "--port", "8000"]

@@ -1,37 +1,40 @@
-# Core libraries
+# Core LangChain & Utilities
 langchain
 langchain-community
 langchain-huggingface
-langchain-text-splitters
+langchain-openai 
+langchain-weaviate 
+langchain-experimental
 tiktoken
 sentence-transformers
 numpy
+filelock
+typing_extensions
 scikit-learn
 nltk
 python-multipart
 
-# Document loaders
+# Document Loaders
 unstructured[pdf]
 python-docx
 lxml
-BeautifulSoup4
+beautifulsoup4
 docx2txt
-pikepdf
 
-# Vector database & embedding support
+# Vector Database: Weaviate
 weaviate-client
+pymongo 
+
+# Hugging Face Hub (required for embedding models)
 huggingface-hub
 
-# Async and database
+# Async & Database
 motor
 asyncio
 
-# Environment variables
+# Environment & Logging
 python-dotenv
 
-# Logging and utilities
-logging
-
-#Docker Build
-uvicorn
+# FastAPI & Server
 fastapi
+uvicorn

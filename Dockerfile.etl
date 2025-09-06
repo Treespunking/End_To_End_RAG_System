@@ -1,19 +1,52 @@
-# Dockerfile.etl
+# -----------------------------
+# Single-stage Dockerfile for ETL Service
+# -----------------------------
 FROM python:3.10-slim
 
+# Set working directory
 WORKDIR /app
 
-RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
+# Install system dependencies for PyTorch, LangChain, PDFs, OpenGL, Poppler, and Tesseract
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    gcc \
+    g++ \
+    libc-dev \
+    libjpeg-dev \
+    zlib1g-dev \
+    cmake \
+    libgl1 \
+    libglib2.0-0 \
+    poppler-utils \
+    tesseract-ocr \
+    && rm -rf /var/lib/apt/lists/*
 
-# Copy and install dependencies
+RUN apt-get update && apt-get install -y curl
+
+# Upgrade pip to the latest version
+RUN pip install --no-cache-dir --upgrade pip
+
+# Install typing_extensions first to avoid Uvicorn/FastAPI issues
+RUN pip install --no-cache-dir typing_extensions>=4.7.0
+
+# Copy requirements file
 COPY requirements-etl.txt .
+
+# Install PyTorch CPU-only first (pinned versions for compatibility)
+RUN pip install --no-cache-dir \
+    torch==2.7.1 \
+    torchvision==0.22.1 \
+    torchaudio==2.7.1 \
+    --index-url https://download.pytorch.org/whl/cpu
+
+# Install the remaining dependencies
 RUN pip install --no-cache-dir -r requirements-etl.txt
 
-# Copy the ETL service script
+# Copy application files
 COPY etl_service.py .
 
-# Expose port
+# Expose FastAPI ETL service port
 EXPOSE 8001
 
-# Run the FastAPI ETL service
+# Start FastAPI app with Uvicorn
 CMD ["uvicorn", "etl_service:app", "--host", "0.0.0.0", "--port", "8001"]

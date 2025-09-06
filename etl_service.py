@@ -111,16 +111,30 @@ def count_tokens(text: str) -> int:
 
 
 # -------------------------------
-# Step 3: Initialize Embeddings (Local Only)
+# Step 3: Initialize Embeddings (Strict Local Loading)
 # -------------------------------
 from langchain_huggingface import HuggingFaceEmbeddings
 
+logger.info("🔹 Preparing HuggingFace embeddings...")
+
+cache_dir = os.getenv("HF_CACHE_DIR", "./models")
+model_name = "bge-small-en-v1.5"
+
+model_path = os.path.join(cache_dir, model_name)
+if not os.path.exists(model_path):
+    logger.critical(
+        f"❌ Model {model_name} not found in {cache_dir}. "
+        "Please ensure you've downloaded it locally first:\n\n"
+        f"from sentence_transformers import SentenceTransformer\n"
+        f"SentenceTransformer('{model_name}', cache_folder='{cache_dir}')"
+    )
+    raise FileNotFoundError(f"Model not found: {model_path}")
+
 embeddings = HuggingFaceEmbeddings(
-    model_name="BAAI/bge-small-en-v1.5",
+    model_name=model_path,
     model_kwargs={"device": "cpu"},  # Use "cuda" if GPU available
     encode_kwargs={"normalize_embeddings": True},
 )
-
 
 # -------------------------------
 # Step 4: Parent Splitter
@@ -145,7 +159,6 @@ import nltk
 nltk.download('punkt', quiet=True)
 
 sentence_splitter = NLTKTextSplitter(chunk_size=100, chunk_overlap=20)
-
 
 def create_hierarchical_chunks(docs: List[Document]):
     parents = parent_splitter.split_documents(docs)
@@ -257,7 +270,7 @@ async def upload_to_weaviate(children: List[Document]):
                     Property(name="cluster_id", data_type=DataType.INT),
                     Property(name="num_sentences", data_type=DataType.INT),
                 ],
-                vector_config=Configure.Vectors.self_provided(size=384)  # BAAI/bge-small-en-v1.5 → 384 dim
+                vector_config=Configure.Vectors.self_provided()  # bge-small-en-v1.5 → 384 dim
             )
             logger.info(f"✅ Created Weaviate collection: '{collection_name}'")
 

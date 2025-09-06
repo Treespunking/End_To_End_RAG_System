@@ -1,19 +1,49 @@
-# Dockerfile.query
+# -----------------------------
+# Single-stage Dockerfile for ETL Service
+# -----------------------------
 FROM python:3.10-slim
 
+# Set working directory
 WORKDIR /app
 
-RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
+# Install system dependencies for PyTorch, LangChain, and other libs
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    gcc \
+    g++ \
+    libc-dev \
+    libjpeg-dev \
+    zlib1g-dev \
+    cmake \
+    && rm -rf /var/lib/apt/lists/*
 
-# Copy and install dependencies
+
+RUN apt-get update && apt-get install -y curl
+
+# Upgrade pip to the latest version
+RUN pip install --no-cache-dir --upgrade pip
+
+# Install typing_extensions first to avoid Uvicorn/FastAPI issues
+RUN pip install --no-cache-dir typing_extensions>=4.7.0
+
+# Copy requirements file
 COPY requirements-query.txt .
+
+# Install PyTorch CPU-only first (pinned versions for compatibility)
+RUN pip install --no-cache-dir \
+    torch==2.7.1 \
+    torchvision==0.22.1 \
+    torchaudio==2.7.1 \
+    --index-url https://download.pytorch.org/whl/cpu
+
+# Install the remaining dependencies
 RUN pip install --no-cache-dir -r requirements-query.txt
 
-# Copy the query engine script
+# Copy application files
 COPY query_engine.py .
 
-# Expose port
+# Expose FastAPI Query Engine port
 EXPOSE 8002
 
-# Run the FastAPI service
+# Start FastAPI app with Uvicorn
 CMD ["uvicorn", "query_engine:app", "--host", "0.0.0.0", "--port", "8002"]

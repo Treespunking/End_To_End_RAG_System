@@ -1,10 +1,10 @@
 # Core dependencies
 langchain
 langchain-openai
+langchain-community
+langchain-experimental
 langchain-weaviate
 langchain-huggingface
-langchain-text-splitters
-huggingface-hub
 numpy
 tiktoken
 openai

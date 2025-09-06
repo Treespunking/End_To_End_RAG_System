@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   # API Gateway Service
   api-gateway:
@@ -8,6 +6,8 @@ services:
       dockerfile: Dockerfile.api
     ports:
       - "8000:8000"
+    volumes:
+      - ./uploads:/app/uploads
     environment:
       - API_GATEWAY_HOST=0.0.0.0
       - API_GATEWAY_PORT=8000
@@ -39,7 +39,9 @@ services:
       - MONGODB_URI=${MONGODB_URI}
       - HF_HUB_DISABLE_SYMLINKS_WARNING=true
       - USER_AGENT=my-rag-app
+      - HF_CACHE_DIR=/app/models   # ✅ Tell HF to look inside mounted folder
     volumes:
+      - ./models/:/app/models
       - ./uploads:/app/uploads
     ports:
       - "8001:8001"
@@ -64,6 +66,9 @@ services:
       - OPENROUTER_MODEL=${OPENROUTER_MODEL:-mistralai/mistral-7b-instruct:free}
       - APP_URL=${APP_URL}
       - APP_NAME=${APP_NAME}
+      - HF_CACHE_DIR=/app/models   # ✅ Tell HF to look inside mounted folder
+    volumes:
+      - ./models/:/app/models
     ports:
       - "8002:8002"
     healthcheck:

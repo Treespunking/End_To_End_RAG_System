@@ -3,7 +3,6 @@ fastapi
 uvicorn[standard]
 httpx
 python-multipart
-loguru
 requests
 # Async file handling
 aiofiles
